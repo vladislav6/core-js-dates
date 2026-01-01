@@ -96,8 +96,8 @@ function getNextFriday(date) {
  * 1, 2024 => 31
  * 2, 2024 => 29
  */
-function getCountDaysInMonth(/* month, year */) {
-  throw new Error('Not implemented');
+function getCountDaysInMonth(month, year) {
+  return new Date(year, month, 0).getDate();
 }
 
 /**
@@ -111,8 +111,69 @@ function getCountDaysInMonth(/* month, year */) {
  * '2024-02-01T00:00:00.000Z', '2024-02-02T00:00:00.000Z'  => 2
  * '2024-02-01T00:00:00.000Z', '2024-02-12T00:00:00.000Z'  => 12
  */
-function getCountDaysOnPeriod(/* dateStart, dateEnd */) {
-  throw new Error('Not implemented');
+function getCountDaysOnPeriod(dateStart, dateEnd) {
+  const firstDay = new Date(dateStart);
+  const secondDay = new Date(dateEnd);
+  function getCountDaysStart(year, month, day) {
+    let count = 0;
+    const daysStart = new Date(year, month + 1, 0).getDate();
+    for (let i = day; i <= daysStart; i += 1) {
+      count += 1;
+    }
+    return count;
+  }
+
+  function getCountDaysEnd(year, month, day) {
+    let count = 0;
+    const daysStart = new Date(
+      year,
+      month + 1,
+      month === secondDay.getMonth() ? day : 0
+    ).getDate();
+    for (let i = 1; i <= daysStart; i += 1) {
+      count += 1;
+    }
+    return count;
+  }
+
+  let count = 0;
+  if (
+    firstDay.getMonth() === secondDay.getMonth() &&
+    secondDay.getFullYear() === firstDay.getFullYear()
+  ) {
+    for (let i = firstDay.getDate(); i <= secondDay.getDate(); i += 1) {
+      count += 1;
+    }
+  } else if (
+    secondDay.getMonth() - firstDay.getMonth() === 1 &&
+    secondDay.getFullYear() === firstDay.getFullYear()
+  ) {
+    count = getCountDaysStart(
+      firstDay.getFullYear(),
+      firstDay.getMonth(),
+      firstDay.getDate()
+    );
+    count += secondDay.getDate();
+  } else if (secondDay.getFullYear() - firstDay.getFullYear() === 1) {
+    let countDaysLastYear = 0;
+    let countDaysThisYear = 0;
+    for (let i = firstDay.getMonth(); i <= 11; i += 1) {
+      countDaysLastYear += getCountDaysStart(
+        firstDay.getFullYear(),
+        i,
+        firstDay.getDate()
+      );
+    }
+    for (let i = 0; i <= secondDay.getMonth(); i += 1) {
+      countDaysThisYear += getCountDaysEnd(
+        secondDay.getFullYear(),
+        i,
+        secondDay.getDate()
+      );
+    }
+    count = countDaysLastYear + countDaysThisYear;
+  }
+  return count;
 }
 
 /**
