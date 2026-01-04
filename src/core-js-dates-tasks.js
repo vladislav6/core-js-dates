@@ -359,8 +359,56 @@ function getQuarter(date) {
  * { start: '01-01-2024', end: '15-01-2024' }, 1, 3 => ['01-01-2024', '05-01-2024', '09-01-2024', '13-01-2024']
  * { start: '01-01-2024', end: '10-01-2024' }, 1, 1 => ['01-01-2024', '03-01-2024', '05-01-2024', '07-01-2024', '09-01-2024']
  */
-function getWorkSchedule(/* period, countWorkDays, countOffDays */) {
-  throw new Error('Not implemented');
+function getWorkSchedule(period, countWorkDays, countOffDays) {
+  function makeDate(date) {
+    const dtArr = date.split('-');
+    const dt = new Date();
+    dt.setFullYear(dtArr[2]);
+    dt.setMonth(dtArr[1] - 1);
+    dt.setDate(dtArr[0]);
+    return dt;
+  }
+
+  const twoDigits = (digit) =>
+    digit.toString().length < 2 ? `0${digit}` : digit;
+
+  const start = makeDate(period.start);
+  const end = makeDate(period.end);
+
+  let countDays = 0;
+  const m = end.getMonth() + 1;
+  for (let i = 1; i <= m; i += 1) {
+    const day = i === m ? end.getDate() : 0;
+    const monthEnd = day !== 31 ? day : 0;
+    countDays += new Date(end.getFullYear(), i, monthEnd).getDate();
+  }
+
+  const year = start.getFullYear();
+  let month = 1;
+  let day = 1;
+  let daysPerMonth = new Date(year, month, 0).getDate();
+  let countAdd = 0;
+  let countNotAdd = 0;
+  const daysArr = [];
+  for (let i = 0; i < countDays; i += 1) {
+    if (daysPerMonth === i) {
+      month += 1;
+      day = 1;
+      daysPerMonth += new Date(year, month, 0).getDate();
+    }
+    if (countAdd !== countWorkDays) {
+      daysArr.push(`${twoDigits(day)}-${twoDigits(month)}-${year}`);
+      countAdd += 1;
+      countNotAdd = 0;
+    }
+    if (countNotAdd === countOffDays) {
+      countAdd = 0;
+    } else {
+      countNotAdd += 1;
+    }
+    day += 1;
+  }
+  return daysArr;
 }
 
 /**
